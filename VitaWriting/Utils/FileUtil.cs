@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 namespace VitaWriting.Utils
 {
@@ -80,8 +81,36 @@ namespace VitaWriting.Utils
         }
 
         /// <summary>
-        /// 遍历文件夹中所有文件
+        /// 保存资源文件
         /// </summary>
+        public static void SaveResource(string resourceName, string outPath = "")
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+
+            var fullResourceName = $"VitaWriting.Resources.{resourceName}";
+
+            using (var stream = assembly.GetManifestResourceStream(fullResourceName))
+            {
+                if (stream == null) return;
+
+                var filePath = Path.Combine(RootFolder, outPath);
+
+                if (string.IsNullOrEmpty(Path.GetExtension(filePath))) filePath = Path.Combine(filePath, resourceName);
+
+                var directoryPath = Path.GetDirectoryName(filePath);
+                if (!string.IsNullOrEmpty(directoryPath) && !Directory.Exists(directoryPath))
+                    Directory.CreateDirectory(directoryPath);
+
+                if (File.Exists(filePath)) return;
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+                {
+                    stream.CopyTo(fileStream);
+                }
+            }
+        }
+
+
         private static void TraverseFiles(string dir, bool deep, Action<FileInfo> action)
         {
             var directory = new DirectoryInfo(Path.Combine(RootFolder, dir));
