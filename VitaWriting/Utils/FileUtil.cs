@@ -58,6 +58,7 @@ namespace VitaWriting.Utils
                 file.Directory?.Create();
                 file.Create().Close();
             }
+
             file.Refresh();
             return file;
         }
@@ -86,18 +87,11 @@ namespace VitaWriting.Utils
             var directory = new DirectoryInfo(Path.Combine(RootFolder, dir));
             if (!directory.Exists) throw new ArgumentException("Directory does not exist.");
 
-            foreach (var file in directory.GetFiles())
-            {
-                action(file);
-            }
+            foreach (var file in directory.GetFiles()) action(file);
 
             if (deep)
-            {
                 foreach (var subDir in directory.GetDirectories())
-                {
                     TraverseFiles(subDir.FullName, true, action);
-                }
-            }
         }
     }
 }

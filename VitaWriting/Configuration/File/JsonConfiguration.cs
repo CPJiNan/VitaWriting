@@ -18,7 +18,10 @@ namespace VitaWriting.Configuration
             _currentPath = currentPath;
         }
 
-        public object Get(string path) => Get(path, null);
+        public object Get(string path)
+        {
+            return Get(path, null);
+        }
 
         public object Get(string path, object def)
         {
@@ -28,17 +31,14 @@ namespace VitaWriting.Configuration
             var keys = path.Split('.');
             var current = _values as IDictionary<string, object>;
 
-            for (int i = 0; i < keys.Length; i++)
+            for (var i = 0; i < keys.Length; i++)
             {
                 var key = keys[i];
 
                 if (current == null || !current.ContainsKey(key))
                     return def;
 
-                if (i == keys.Length - 1)
-                {
-                    return current[key];
-                }
+                if (i == keys.Length - 1) return current[key];
 
                 current = current[key] as IDictionary<string, object>;
             }
@@ -51,7 +51,7 @@ namespace VitaWriting.Configuration
             var keys = path.Split('.');
             var current = _values;
 
-            for (int i = 0; i < keys.Length; i++)
+            for (var i = 0; i < keys.Length; i++)
             {
                 var key = keys[i];
 
@@ -69,6 +69,7 @@ namespace VitaWriting.Configuration
                         nested = new Dictionary<string, object>();
                         current[key] = nested;
                     }
+
                     current = nested;
                 }
             }
@@ -251,36 +252,24 @@ namespace VitaWriting.Configuration
 
         public static JsonConfiguration LoadConfiguration(FileInfo file)
         {
-            if (file == null || !file.Exists)
-            {
-                throw new FileNotFoundException("File does not exist.", file?.FullName);
-            }
+            if (file == null || !file.Exists) throw new FileNotFoundException("File does not exist.", file?.FullName);
 
             var config = new JsonConfiguration(file.Name, file.FullName);
 
             var jsonContent = File.ReadAllText(file.FullName);
 
-            if (string.IsNullOrWhiteSpace(jsonContent))
-            {
-                jsonContent = "{}";
-            }
+            if (string.IsNullOrWhiteSpace(jsonContent)) jsonContent = "{}";
 
             var deserializedData = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonContent);
 
-            foreach (var kvp in deserializedData)
-            {
-                config.Set(kvp.Key, kvp.Value);
-            }
+            foreach (var kvp in deserializedData) config.Set(kvp.Key, kvp.Value);
 
             return config;
         }
 
         public void SaveToFile(FileInfo file)
         {
-            if (file == null)
-            {
-                throw new FileNotFoundException("File does not exist.", file?.FullName);
-            }
+            if (file == null) throw new FileNotFoundException("File does not exist.", file?.FullName);
 
             var jsonContent = JsonConvert.SerializeObject(_values, Formatting.Indented);
 

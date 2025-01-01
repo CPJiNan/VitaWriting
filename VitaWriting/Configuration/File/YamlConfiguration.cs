@@ -18,7 +18,10 @@ namespace VitaWriting.Configuration
             _currentPath = currentPath;
         }
 
-        public object Get(string path) => Get(path, null);
+        public object Get(string path)
+        {
+            return Get(path, null);
+        }
 
         public object Get(string path, object def)
         {
@@ -28,17 +31,14 @@ namespace VitaWriting.Configuration
             var keys = path.Split('.');
             var current = _values as IDictionary<string, object>;
 
-            for (int i = 0; i < keys.Length; i++)
+            for (var i = 0; i < keys.Length; i++)
             {
                 var key = keys[i];
 
                 if (current == null || !current.ContainsKey(key))
                     return def;
 
-                if (i == keys.Length - 1)
-                {
-                    return current[key];
-                }
+                if (i == keys.Length - 1) return current[key];
 
                 current = current[key] as IDictionary<string, object>;
             }
@@ -52,7 +52,7 @@ namespace VitaWriting.Configuration
             var keys = path.Split('.');
             var current = _values;
 
-            for (int i = 0; i < keys.Length; i++)
+            for (var i = 0; i < keys.Length; i++)
             {
                 var key = keys[i];
 
@@ -70,6 +70,7 @@ namespace VitaWriting.Configuration
                         nested = new Dictionary<string, object>();
                         current[key] = nested;
                     }
+
                     current = nested;
                 }
             }
@@ -252,39 +253,27 @@ namespace VitaWriting.Configuration
 
         public static YamlConfiguration LoadConfiguration(FileInfo file)
         {
-            if (file == null || !file.Exists)
-            {
-                throw new FileNotFoundException("File does not exist.", file?.FullName);
-            }
+            if (file == null || !file.Exists) throw new FileNotFoundException("File does not exist.", file?.FullName);
 
             var config = new YamlConfiguration(file.Name, file.FullName);
 
             var yamlContent = File.ReadAllText(file.FullName);
 
-            if (string.IsNullOrWhiteSpace(yamlContent))
-            {
-                yamlContent = "{}";
-            }
+            if (string.IsNullOrWhiteSpace(yamlContent)) yamlContent = "{}";
 
             var deserializer = new DeserializerBuilder()
                 .Build();
 
             var deserializedData = deserializer.Deserialize<Dictionary<string, object>>(yamlContent);
 
-            foreach (var kvp in deserializedData)
-            {
-                config.Set(kvp.Key, kvp.Value);
-            }
+            foreach (var kvp in deserializedData) config.Set(kvp.Key, kvp.Value);
 
             return config;
         }
 
         public void SaveToFile(FileInfo file)
         {
-            if (file == null)
-            {
-                throw new FileNotFoundException("File does not exist.", file?.FullName);
-            }
+            if (file == null) throw new FileNotFoundException("File does not exist.", file?.FullName);
 
             var serializer = new SerializerBuilder()
                 .Build();
@@ -293,6 +282,5 @@ namespace VitaWriting.Configuration
 
             File.WriteAllText(file.FullName, yamlContent);
         }
-
     }
 }
