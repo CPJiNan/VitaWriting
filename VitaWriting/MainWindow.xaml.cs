@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using VitaWriting.Utils;
 
 namespace VitaWriting
 {
@@ -8,7 +7,6 @@ namespace VitaWriting
         public MainWindow()
         {
             InitializeComponent();
-            FileUtil.SaveResource("Settings.yml", "Test.yml");
         }
     }
 }
